@@ -6,9 +6,12 @@ use Database\Factories\TrackedJobFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+// use Illuminate\Database\Eloquent\Model;
+//
+use Jenssegers\Mongodb\Eloquent\Model;
+use Jenssegers\Mongodb\Relations\MorphTo;
+
 use Junges\TrackableJobs\Concerns\HasUuid;
 use Junges\TrackableJobs\Contracts\TrackableJobContract;
 

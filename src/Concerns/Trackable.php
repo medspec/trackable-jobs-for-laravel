@@ -2,7 +2,8 @@
 
 namespace Junges\TrackableJobs\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Junges\TrackableJobs\Jobs\Middleware\TrackedJobMiddleware;
 use Junges\TrackableJobs\Models\TrackedJob;
 use Throwable;
