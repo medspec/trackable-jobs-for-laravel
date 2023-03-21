@@ -16,8 +16,6 @@ use Junges\TrackableJobs\Concerns\HasUuid;
 use Junges\TrackableJobs\Contracts\TrackableJobContract;
 
 /**
- * Class TrackedJob
- *
  * @package Junges\TrackableJobs\Models
  * @property string|null uuid
  * @property int trackable_id
@@ -36,12 +34,14 @@ class TrackedJob extends Model implements TrackableJobContract
     use Prunable;
 
     const STATUS_QUEUED = 'queued';
+    const STATUS_RETRYING = 'retrying';
     const STATUS_STARTED = 'started';
     const STATUS_FINISHED = 'finished';
     const STATUS_FAILED = 'failed';
 
     const STATUSES = [
         self::STATUS_QUEUED,
+        self::STATUS_RETRYING,
         self::STATUS_STARTED,
         self::STATUS_FINISHED,
         self::STATUS_FAILED,
@@ -78,13 +78,16 @@ class TrackedJob extends Model implements TrackableJobContract
         }
     }
 
-    public function prunable()
+    public function prunable(): Builder
     {
         if (is_null(config('trackable-jobs.prunable_after'))) {
             return static::query()->where('id', null);
         }
 
-        return static::where('created_at', '<=', now()->subDays(config('trackable-jobs.prunable_after')));
+        $query = static::where('created_at', '<=', now()->subDays(config('trackable-jobs.prunable_after')));
+        assert($query instanceof Builder);
+
+        return $query;
     }
 
     public function trackable(): MorphTo
@@ -97,6 +100,20 @@ class TrackedJob extends Model implements TrackableJobContract
         return $this->update([
             'status' => static::STATUS_STARTED,
             'started_at' => now(),
+        ]);
+    }
+
+    public function markAsQueued(): bool
+    {
+        return $this->update([
+            'status' => static::STATUS_QUEUED,
+        ]);
+    }
+
+    public function markAsRetrying(): bool
+    {
+        return $this->update([
+            'status' => static::STATUS_RETRYING,
         ]);
     }
 
@@ -131,11 +148,7 @@ class TrackedJob extends Model implements TrackableJobContract
         ]);
     }
 
-    /**
-     * Whether the job has already started.
-     *
-     * @return bool
-     */
+    /** Whether the job has already started. */
     public function hasStarted(): bool
     {
         return ! empty($this->started_at);
@@ -145,8 +158,6 @@ class TrackedJob extends Model implements TrackableJobContract
      * Get the duration of the job, in human diff.
      *
      * @throws \Exception
-     *
-     * @return string
      */
     public function getDurationAttribute(): string
     {

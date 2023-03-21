@@ -20,8 +20,8 @@ trait Trackable
 
         $this->trackedJob = TrackedJob::create([
             'trackable_id' => $this->model->id ?? $this->model->uuid,
-            'trackable_type' => get_class($this->model),
-            'name' => class_basename(static::class),
+            'trackable_type' => $this->model->getMorphClass(),
+            'name' => static::class,
         ]);
     }
 
@@ -30,7 +30,7 @@ trait Trackable
         return [new TrackedJobMiddleware()];
     }
 
-    public function failed(Throwable $exception)
+    public function failed(Throwable $exception): void
     {
         $message = $exception->getMessage();
 
